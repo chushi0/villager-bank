@@ -50,14 +50,14 @@ public class ClarkVillagerEntity extends MerchantEntity {
     }
 
     public static void initialize() {
-        entityType = Registry.register(Registries.ENTITY_TYPE, VillageBank.identity("clark_village"),
+        entityType = Registry.register(Registries.ENTITY_TYPE, VillageBank.identity("clark_villager"),
                 FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, ClarkVillagerEntity::new)
                         .dimensions(EntityDimensions.fixed(0.6f, 1.95f))
                         .trackRangeChunks(10)
                         .build());
         FabricDefaultAttributeRegistry.register(entityType, createMobAttributes());
         spawnEgg = new SpawnEggItem(entityType, 0xc4c4c4, 0xadadad, new Item.Settings());
-        Registry.register(Registries.ITEM, VillageBank.identity("clark_village_spawn_egg"), spawnEgg);
+        Registry.register(Registries.ITEM, VillageBank.identity("clark_villager_spawn_egg"), spawnEgg);
     }
 
     @Override
