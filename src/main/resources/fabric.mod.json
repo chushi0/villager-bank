@@ -22,7 +22,9 @@
       "online.cszt0.mcmod.bank.VillageBankClient"
     ]
   },
-  "mixins": [],
+  "mixins": [
+    "fabric.mod.mixin.json"
+  ],
   "depends": {
     "fabricloader": ">=0.14.11",
     "fabric-api": "*",
