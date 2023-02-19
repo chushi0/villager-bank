@@ -13,11 +13,22 @@ import java.util.stream.Collectors;
 
 import lombok.SneakyThrows;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 
-public class NetworkPackage {
+public abstract class NetworkPackage {
+    public final void send(PlayerEntity player) {
+        if (player instanceof ServerPlayerEntity serverPlayer) {
+            ServerPlayNetworking.send(serverPlayer, identifier(), getMarshalResult());
+        }
+    }
+
+    protected abstract Identifier identifier();
 
     public final PacketByteBuf getMarshalResult() {
         PacketByteBuf buf = PacketByteBufs.create();
@@ -35,10 +46,6 @@ public class NetworkPackage {
                 .collect(Collectors.toList());
         for (Pair<Field, Net> pair : list) {
             Field field = pair.getLeft();
-            String name = pair.getRight().name();
-            if (name.isEmpty()) {
-                name = field.getName();
-            }
             field.setAccessible(true);
             Class<?> type = field.getType();
             Object value = field.get(this);
@@ -71,10 +78,6 @@ public class NetworkPackage {
                 .collect(Collectors.toList());
         for (Pair<Field, Net> pair : list) {
             Field field = pair.getLeft();
-            String name = pair.getRight().name();
-            if (name.isEmpty()) {
-                name = field.getName();
-            }
             field.setAccessible(true);
             Class<?> type = field.getType();
             if (type == Integer.TYPE) {
@@ -98,8 +101,6 @@ public class NetworkPackage {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     public @interface Net {
-        String name() default "";
-
         int order() default -1;
     }
 }

@@ -3,10 +3,8 @@ package online.cszt0.mcmod.bank.entity;
 import org.jetbrains.annotations.Nullable;
 
 import lombok.Getter;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
@@ -32,7 +30,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -40,8 +37,6 @@ import net.minecraft.village.TradeOffer;
 import net.minecraft.world.World;
 import online.cszt0.mcmod.bank.VillageBank;
 import online.cszt0.mcmod.bank.net.OpenClarkScenePackage;
-import online.cszt0.mcmod.bank.net.PackageIdentifier;
-import online.cszt0.mcmod.bank.screen.BankScreen;
 
 public class ClarkVillagerEntity extends MerchantEntity {
 
@@ -57,7 +52,8 @@ public class ClarkVillagerEntity extends MerchantEntity {
     public static void initialize() {
         entityType = Registry.register(Registries.ENTITY_TYPE, VillageBank.identity("clark_village"),
                 FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, ClarkVillagerEntity::new)
-                        .dimensions(EntityDimensions.fixed(0.75f, 0.75f))
+                        .dimensions(EntityDimensions.fixed(0.6f, 1.95f))
+                        .trackRangeChunks(10)
                         .build());
         FabricDefaultAttributeRegistry.register(entityType, createMobAttributes());
         spawnEgg = new SpawnEggItem(entityType, 0xc4c4c4, 0xadadad, new Item.Settings());
@@ -87,9 +83,7 @@ public class ClarkVillagerEntity extends MerchantEntity {
             return super.interactMob(player, hand);
         }
         setCustomer(player);
-        MinecraftClient.getInstance().execute(() -> MinecraftClient.getInstance().setScreen(new BankScreen()));
-        ServerPlayNetworking.send((ServerPlayerEntity) player, PackageIdentifier.OPEN_CLARK_SCENE,
-                new OpenClarkScenePackage(getUuid()).getMarshalResult());
+        new OpenClarkScenePackage(getUuid()).send(player);
         return ActionResult.success(world.isClient);
     }
 
