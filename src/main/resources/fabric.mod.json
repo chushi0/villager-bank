@@ -1,31 +1,28 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "cszt0-village-bank",
   "version": "${version}",
-
-  "name": "Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "name": "Village Bank",
+  "description": "Village Bank",
   "authors": [
-    "Me!"
+    "cszt0"
   ],
   "contact": {
     "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "sources": "https://github.com/chushi0/villager-bank"
   },
-
   "license": "CC0-1.0",
   "icon": "assets/modid/icon.png",
-
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.fabricmc.example.ExampleMod"
+      "online.cszt0.mcmod.bank.VillageBank"
+    ],
+    "client": [
+      "online.cszt0.mcmod.bank.VillageBankClient"
     ]
   },
-  "mixins": [
-    "modid.mixins.json"
-  ],
-
+  "mixins": [],
   "depends": {
     "fabricloader": ">=0.14.11",
     "fabric-api": "*",
