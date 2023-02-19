@@ -1,0 +1,34 @@
+{
+    "display": {
+        "icon": {
+            "item": "minecraft:iron_sword"
+        },
+        "title": {
+            "translate": "advancements.adventure.village_bank.kill_clark.title"
+        },
+        "frame": "goal",
+        "description": {
+            "translate": "advancements.adventure.village_bank.kill_clark.description"
+        },
+        "announce_to_chat": true,
+        "show_toast": true,
+        "hidden": true
+    },
+    "parent": "village_bank:village_bank/convert_clark",
+    "criteria": {
+        "kill_clark": {
+            "trigger": "minecraft:player_killed_entity",
+            "conditions": {
+                "entity": {
+                    "type": "village_bank:clark_villager"
+                }
+            }
+        }
+    },
+    "rewards": {
+        "experience": 5,
+        "loot": [
+            "village_bank:advancements/kill_clark"
+        ]
+    }
+}
