@@ -15,6 +15,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import online.cszt0.mcmod.bank.VillageBank;
+import online.cszt0.mcmod.bank.criterion.ConvertClarkCriterion;
 import online.cszt0.mcmod.bank.entity.ClarkVillagerEntity;
 
 @Mixin(VillagerEntity.class)
@@ -42,5 +43,7 @@ public abstract class VillagerEntityMixin {
 
         releaseAllTickets();
         entity.convertTo(ClarkVillagerEntity.getEntityType(), true);
+
+        ConvertClarkCriterion.getCriterion().trigger((ServerPlayerEntity) player);
     }
 }

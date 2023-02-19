@@ -1,4 +1,8 @@
 {
-    "entity.village_bank.clark_villager": "绿宝石商人",
-    "item.village_bank.clark_villager_spawn_egg": "绿宝石商人刷怪蛋"
+    "entity.village_bank.clark_villager": "银行专员",
+    "item.village_bank.clark_villager_spawn_egg": "银行专员刷怪蛋",
+    "advancements.adventure.village_bank.title": "村庄银行",
+    "advancements.adventure.village_bank.description": "存款、贷款、投资和破产！",
+    "advancements.adventure.village_bank.convert_clark.title": "银行专员",
+    "advancements.adventure.village_bank.convert_clark.description": "将绿宝石块给村民，使村民变为银行专员"
 }

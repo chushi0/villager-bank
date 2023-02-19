@@ -1,0 +1,26 @@
+{
+    "display": {
+        "icon": {
+            "item": "minecraft:emerald_block"
+        },
+        "title": {
+            "translate": "advancements.adventure.village_bank.convert_clark.title"
+        },
+        "frame": "task",
+        "description": {
+            "translate": "advancements.adventure.village_bank.convert_clark.description"
+        },
+        "announce_to_chat": true,
+        "show_toast": true
+    },
+    "parent": "village_bank:village_bank/root",
+    "criteria": {
+        "convert_clark": {
+            "trigger": "village_bank:criterion_convert_clark",
+            "conditions": {}
+        }
+    },
+    "rewards": {
+        "experience": 10
+    }
+}

@@ -1,0 +1,23 @@
+{
+    "display": {
+        "icon": {
+            "item": "minecraft:emerald"
+        },
+        "title": {
+            "translate": "advancements.adventure.village_bank.title"
+        },
+        "frame": "task",
+        "background": "minecraft:textures/block/emerald_block.png",
+        "description": {
+            "translate": "advancements.adventure.village_bank.description"
+        },
+        "announce_to_chat": false,
+        "show_toast": false
+    },
+    "criteria": {
+        "welcome": {
+            "trigger": "minecraft:tick",
+            "conditions": {}
+        }
+    }
+}

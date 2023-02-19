@@ -5,6 +5,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.util.Identifier;
+import online.cszt0.mcmod.bank.criterion.ConvertClarkCriterion;
 import online.cszt0.mcmod.bank.entity.ClarkVillagerEntity;
 
 @Slf4j(topic = VillageBank.MODID)
@@ -14,6 +15,7 @@ public class VillageBank implements ModInitializer {
     @Override
     public void onInitialize() {
         ClarkVillagerEntity.initialize();
+        ConvertClarkCriterion.initialize();
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.SPAWN_EGGS).register(content -> {
             content.add(ClarkVillagerEntity.getSpawnEgg());
         });
