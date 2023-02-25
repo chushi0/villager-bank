@@ -12,6 +12,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import online.cszt0.mcmod.bank.VillageBank;
@@ -39,7 +40,8 @@ public abstract class VillagerEntityMixin {
         if (!(player instanceof ServerPlayerEntity)) {
             return;
         }
-        itemStack.setCount(itemStack.getCount() - 1);
+        itemStack.decrement(1);
+        entity.playSound(SoundEvents.ENTITY_ZOMBIE_VILLAGER_CURE, 1.0F, entity.getSoundPitch());
 
         releaseAllTickets();
         entity.convertTo(ClarkVillagerEntity.getEntityType(), true);
