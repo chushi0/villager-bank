@@ -82,8 +82,8 @@ public class ClarkVillagerEntity extends MerchantEntity {
         if (!isAlive() || hasCustomer()) {
             return super.interactMob(player, hand);
         }
-        setCustomer(player);
-        new OpenClarkScenePackage(getUuid()).send(player);
+        // setCustomer(player);
+        new OpenClarkScenePackage(getUuid(), getName()).send(player);
         return ActionResult.success(world.isClient);
     }
 

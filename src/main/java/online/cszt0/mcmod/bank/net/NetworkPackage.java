@@ -17,6 +17,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
@@ -58,6 +59,8 @@ public abstract class NetworkPackage {
                 buf.writeString((String) value);
             } else if (type == BlockPos.class) {
                 buf.writeBlockPos((BlockPos) value);
+            } else if (type == Text.class) {
+                buf.writeText((Text) value);
             } else if (type == UUID.class) {
                 buf.writeUuid((UUID) value);
             } else if (NetworkPackage.class.isAssignableFrom(type)) {
@@ -86,6 +89,8 @@ public abstract class NetworkPackage {
                 field.set(this, buf.readString());
             } else if (type == BlockPos.class) {
                 field.set(this, buf.readBlockPos());
+            } else if (type == Text.class) {
+                field.set(this, buf.readText());
             } else if (type == UUID.class) {
                 field.set(this, buf.readUuid());
             } else if (NetworkPackage.class.isAssignableFrom(type)) {
