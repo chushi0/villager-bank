@@ -28,8 +28,6 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
         super(handler, inventory, title);
         this.backgroundWidth = 276;
         this.playerInventoryTitleX = 107;
-
-        handler.setupInventory(inventory);
     }
 
     @Override
@@ -57,26 +55,32 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
 
         private PlayerInventory inventory;
 
-        public Handler() {
+        public Handler(PlayerInventory inventory) {
             super(ScreenHandlerType.MERCHANT, 0);
+            setupInventory(inventory);
         }
 
-        public void setupInventory(PlayerInventory inventory) {
+        private void setupInventory(PlayerInventory inventory) {
             this.inventory = inventory;
+
+            for (int i = 0; i < 9; ++i) {
+                this.addSlot(new Slot(inventory, i, 108 + i * 18, 142));
+            }
             for (int i = 0; i < 3; ++i) {
                 for (int j = 0; j < 9; ++j) {
                     this.addSlot(new Slot(inventory, j + i * 9 + 9, 108 + j * 18, 84 + i * 18));
                 }
             }
-
-            for (int i = 0; i < 9; ++i) {
-                this.addSlot(new Slot(inventory, i, 108 + i * 18, 142));
-            }
         }
 
         @Override
         public boolean canUse(PlayerEntity player) {
-            return inventory.canPlayerUse(player);
+            return true;
+        }
+
+        @Override
+        public boolean canInsertIntoSlot(ItemStack stack, Slot slot) {
+            return false;
         }
 
         @Override

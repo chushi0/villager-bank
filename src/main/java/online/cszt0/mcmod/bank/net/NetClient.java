@@ -30,9 +30,11 @@ public class NetClient {
         OpenClarkScenePackage pkg = new OpenClarkScenePackage();
         pkg.unmarshal(packetbytebuf);
         log.info("onOpenClarkScreen: entity {}", pkg.getEntity());
-        BankScreen.Handler handler = new BankScreen.Handler();
+        BankScreen.Handler handler = new BankScreen.Handler(minecraftclient.player.getInventory());
         handler.setEntityUuid(pkg.getEntity());
-        minecraftclient.execute(() -> minecraftclient
-                .setScreen(new BankScreen(handler, minecraftclient.player.getInventory(), pkg.getName())));
+        minecraftclient.execute(() -> {
+            minecraftclient.player.currentScreenHandler = handler;
+            minecraftclient.setScreen(new BankScreen(handler, minecraftclient.player.getInventory(), pkg.getName()));
+        });
     }
 }
