@@ -39,7 +39,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.village.TradeOffer;
 import net.minecraft.world.World;
 import online.cszt0.mcmod.bank.VillageBank;
-import online.cszt0.mcmod.bank.net.OpenClarkScenePackage;
+import online.cszt0.mcmod.bank.screen.BankScreen;
 
 public class ClarkVillagerEntity extends MerchantEntity {
 
@@ -86,7 +86,8 @@ public class ClarkVillagerEntity extends MerchantEntity {
             return super.interactMob(player, hand);
         }
         // setCustomer(player);
-        new OpenClarkScenePackage(getUuid(), getName()).send(player);
+        // new OpenClarkScenePackage(getUuid(), getName()).send(player);
+        player.openHandledScreen(BankScreen.createFactory(this));
         return ActionResult.success(world.isClient);
     }
 

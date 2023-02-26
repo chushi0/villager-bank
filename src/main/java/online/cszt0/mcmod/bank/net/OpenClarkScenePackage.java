@@ -9,6 +9,7 @@ import lombok.Setter;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
+@Deprecated(forRemoval = true, since = "0.0.0")
 @NoArgsConstructor
 @AllArgsConstructor
 public class OpenClarkScenePackage extends NetworkPackage {
