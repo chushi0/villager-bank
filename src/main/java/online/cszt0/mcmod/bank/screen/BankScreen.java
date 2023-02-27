@@ -67,7 +67,7 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
         @Getter
         private UUID entityUuid;
 
-        // private PlayerInventory inventory;
+        private PlayerInventory inventory;
 
         public Handler(int syncId, PlayerInventory inventory) {
             super(ScreenType, syncId);
@@ -75,7 +75,7 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
         }
 
         private void setupInventory(PlayerInventory inventory) {
-            // this.inventory = inventory;
+            this.inventory = inventory;
 
             for (int i = 0; i < 9; ++i) {
                 this.addSlot(new Slot(inventory, i, 108 + i * 18, 142));
@@ -94,7 +94,10 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
 
         @Override
         public boolean canInsertIntoSlot(ItemStack stack, Slot slot) {
-            return false;
+            if (slot.inventory == inventory) {
+                return true;
+            }
+            return super.canInsertIntoSlot(stack, slot);
         }
 
         @Override
