@@ -7,6 +7,7 @@ import net.minecraft.item.ItemGroups;
 import net.minecraft.util.Identifier;
 import online.cszt0.mcmod.bank.criterion.ConvertClarkCriterion;
 import online.cszt0.mcmod.bank.entity.ClarkVillagerEntity;
+import online.cszt0.mcmod.bank.screen.BankScreen;
 
 @Slf4j(topic = VillageBank.MODID)
 public class VillageBank implements ModInitializer {
@@ -19,6 +20,7 @@ public class VillageBank implements ModInitializer {
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.SPAWN_EGGS).register(content -> {
             content.add(ClarkVillagerEntity.getSpawnEgg());
         });
+        BankScreen.initializeHandler();
         log.info("initialized");
     }
 

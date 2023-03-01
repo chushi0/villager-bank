@@ -1,5 +1,6 @@
 package online.cszt0.mcmod.bank.screen;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -8,6 +9,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.render.GameRenderer;
@@ -18,18 +21,25 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import online.cszt0.mcmod.bank.VillageBank;
+import online.cszt0.mcmod.bank.data.BankData;
+import online.cszt0.mcmod.bank.data.PlayerBankData;
 import online.cszt0.mcmod.bank.entity.ClarkVillagerEntity;
 
 @Slf4j(topic = VillageBank.MODID)
 public class BankScreen extends HandledScreen<BankScreen.Handler> {
-    public static final ScreenHandlerType<Handler> ScreenType = new ScreenHandlerType<>(Handler::new);
+    public static final ScreenHandlerType<Handler> ScreenType = new ExtendedScreenHandlerType<>(Handler::new);
+    public static final Identifier ScreenHandler = VillageBank.identity("bank_screen_handler");
     private static final Identifier TEXTURE = VillageBank.identity("textures/gui/clark.png");
 
     private static final Text DEPOSIT_TEXT = Text.translatable("ui.village_bank.bank_screen.deposit");
@@ -44,6 +54,10 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
 
     public static void initialize() {
         HandledScreens.register(ScreenType, BankScreen::new);
+    }
+
+    public static void initializeHandler() {
+        Registry.register(Registries.SCREEN_HANDLER, ScreenHandler, ScreenType);
     }
 
     public static NamedScreenHandlerFactory createFactory(ClarkVillagerEntity entity) {
@@ -80,25 +94,36 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
         @Getter
         private UUID entityUuid;
 
-        private PlayerInventory playerInventory;
-        private BankInventory bankInventory;
+        private final PlayerInventory playerInventory;
+        private final BankInventory bankInventory;
 
         public Handler(int syncId, PlayerInventory inventory) {
             super(ScreenType, syncId);
+            this.playerInventory = inventory;
             this.bankInventory = new BankInventory();
-            setupInventory(inventory);
+            setupInventory();
             setupDepositAndWithdraw();
         }
 
-        private void setupInventory(PlayerInventory inventory) {
-            this.playerInventory = inventory;
+        public Handler(int syncId, PlayerInventory inv, PlayerEntity player) {
+            this(syncId, inv);
+            PlayerBankData data = BankData.getBankData(player.getServer()).getPlayerData(player);
+            bankInventory.moneyCount = data.getDeposit();
+            bankInventory.bankData = Optional.of(data);
+        }
 
+        public Handler(int syncId, PlayerInventory inv, PacketByteBuf buf) {
+            this(syncId, inv);
+            bankInventory.moneyCount = buf.readInt();
+        }
+
+        private void setupInventory() {
             for (int i = 0; i < 9; ++i) {
-                this.addSlot(new Slot(inventory, i, 108 + i * 18, 142));
+                this.addSlot(new Slot(playerInventory, i, 108 + i * 18, 142));
             }
             for (int i = 0; i < 3; ++i) {
                 for (int j = 0; j < 9; ++j) {
-                    this.addSlot(new Slot(inventory, j + i * 9 + 9, 108 + j * 18, 84 + i * 18));
+                    this.addSlot(new Slot(playerInventory, j + i * 9 + 9, 108 + j * 18, 84 + i * 18));
                 }
             }
         }
@@ -150,7 +175,8 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
         static final int INPUT_SLOT = 0;
         static final int OUTPUT_SLOT = 1;
 
-        private int moneyCount = 32;
+        private int moneyCount;
+        private Optional<PlayerBankData> bankData = Optional.empty();
 
         @Override
         public void clear() {
@@ -177,6 +203,7 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
         @Override
         public void markDirty() {
             log.info("money: {}", moneyCount);
+            bankData.ifPresent(data -> data.setDeposit(moneyCount));
         }
 
         @Override
@@ -250,17 +277,23 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
     }
 
     @RequiredArgsConstructor
-    public static class Factory implements NamedScreenHandlerFactory {
+    public static class Factory implements ExtendedScreenHandlerFactory {
         private final ClarkVillagerEntity entity;
 
         @Override
         public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
-            return new Handler(syncId, inv);
+            return new Handler(syncId, inv, player);
         }
 
         @Override
         public Text getDisplayName() {
             return entity.getName();
+        }
+
+        @Override
+        public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
+            PlayerBankData data = BankData.getBankData(player.getServer()).getPlayerData(player);
+            buf.writeInt(data.getDeposit());
         }
     }
 }
