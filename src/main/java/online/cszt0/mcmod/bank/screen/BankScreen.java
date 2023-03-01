@@ -51,6 +51,13 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
     }
 
     @Override
+    protected void drawForeground(MatrixStack matrices, int mouseX, int mouseY) {
+        super.drawForeground(matrices, mouseX, mouseY);
+        textRenderer.draw(matrices, DEPOSIT_TEXT, 157 - textRenderer.getWidth(DEPOSIT_TEXT) / 2, 21, 4210752);
+        textRenderer.draw(matrices, WITHDRAW_TEXT, 228 - textRenderer.getWidth(WITHDRAW_TEXT) / 2, 21, 4210752);
+    }
+
+    @Override
     protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -73,7 +80,7 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
         @Getter
         private UUID entityUuid;
 
-        private PlayerInventory inventory;
+        private PlayerInventory playerInventory;
         private BankInventory bankInventory;
 
         public Handler(int syncId, PlayerInventory inventory) {
@@ -84,7 +91,7 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
         }
 
         private void setupInventory(PlayerInventory inventory) {
-            this.inventory = inventory;
+            this.playerInventory = inventory;
 
             for (int i = 0; i < 9; ++i) {
                 this.addSlot(new Slot(inventory, i, 108 + i * 18, 142));
@@ -109,15 +116,32 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
 
         @Override
         public boolean canInsertIntoSlot(ItemStack stack, Slot slot) {
-            if (slot.inventory == inventory) {
+            if (slot.inventory == playerInventory) {
                 return true;
             }
             return super.canInsertIntoSlot(stack, slot);
         }
 
         @Override
-        public ItemStack quickMove(PlayerEntity player, int slot) {
-            log.info("quickMove");
+        public ItemStack quickMove(PlayerEntity player, int slotIndex) {
+            Slot slot = getSlot(slotIndex);
+            if (slot.inventory == playerInventory) {
+                ItemStack stack = slot.getStack();
+                if (stack.isEmpty()) {
+                    return ItemStack.EMPTY;
+                }
+                Item item = stack.getItem();
+                if (item == Items.EMERALD || item == Items.EMERALD_BLOCK) {
+                    bankInventory.setStack(BankInventory.INPUT_SLOT, stack);
+                    slot.takeStack(stack.getCount());
+                    bankInventory.markDirty();
+                    return ItemStack.EMPTY;
+                }
+            }
+            ItemStack stack = new ItemStack(Items.EMERALD, bankInventory.moneyCount);
+            playerInventory.insertStack(stack);
+            bankInventory.moneyCount = stack.getCount();
+            bankInventory.markDirty();
             return ItemStack.EMPTY;
         }
     }
@@ -152,6 +176,7 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
 
         @Override
         public void markDirty() {
+            log.info("money: {}", moneyCount);
         }
 
         @Override
