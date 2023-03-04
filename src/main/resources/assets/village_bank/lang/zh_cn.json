@@ -1,6 +1,8 @@
 {
     "entity.village_bank.clark_villager": "银行专员",
     "item.village_bank.clark_villager_spawn_egg": "银行专员刷怪蛋",
+    "item.village_bank.deposit_certificate": "无法兑现的存款证明",
+    "item.village_bank.deposit_certificate.time_deposit": "定期存款证明",
     "advancements.adventure.village_bank.title": "村庄银行",
     "advancements.adventure.village_bank.description": "存款、贷款、投资和破产！",
     "advancements.adventure.village_bank.convert_clark.title": "银行专员",
@@ -11,5 +13,10 @@
     "ui.village_bank.bank_screen.withdraw": "取款",
     "ui.village_bank.bank_screen.remain": "余额：%1$s",
     "command.village_bank.error.invalid_argument": "参数错误：%1$s",
-    "command.village_bank.info.deposit": "当前资源持有数：%1$s"
+    "command.village_bank.info.deposit": "当前资源持有数：%1$s",
+    "tooltip.village_bank.deposit_certificate.capital": "本金：%1$s",
+    "tooltip.village_bank.deposit_certificate.time": "周期：%1$s 个月",
+    "tooltip.village_bank.deposit_certificate.produce_interest": "产生利息：%1$s",
+    "tooltip.village_bank.deposit_certificate.finish_interest": "结清利息：%1$s",
+    "tooltip.village_bank.deposit_certificate.tip": "与银行专员交换证明可更新证明信息"
 }

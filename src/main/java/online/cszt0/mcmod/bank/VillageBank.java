@@ -8,6 +8,7 @@ import net.minecraft.util.Identifier;
 import online.cszt0.mcmod.bank.command.BankCommand;
 import online.cszt0.mcmod.bank.criterion.ConvertClarkCriterion;
 import online.cszt0.mcmod.bank.entity.ClarkVillagerEntity;
+import online.cszt0.mcmod.bank.item.DepositCertificate;
 import online.cszt0.mcmod.bank.screen.BankScreen;
 
 @Slf4j(topic = VillageBank.MODID)
@@ -16,6 +17,7 @@ public class VillageBank implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        DepositCertificate.initialize();
         ClarkVillagerEntity.initialize();
         ConvertClarkCriterion.initialize();
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.SPAWN_EGGS).register(content -> {
