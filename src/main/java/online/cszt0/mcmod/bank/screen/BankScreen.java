@@ -1,6 +1,6 @@
 package online.cszt0.mcmod.bank.screen;
 
-import java.util.Optional;
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -21,6 +21,7 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -108,13 +109,13 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
         public Handler(int syncId, PlayerInventory inv, PlayerEntity player) {
             this(syncId, inv);
             PlayerBankData data = BankData.getBankData(player.getServer()).getPlayerData(player);
-            bankInventory.moneyCount = data.getDeposit();
-            bankInventory.bankData = Optional.of(data);
+            bankInventory.bankData = data;
         }
 
         public Handler(int syncId, PlayerInventory inv, PacketByteBuf buf) {
             this(syncId, inv);
-            bankInventory.moneyCount = buf.readInt();
+            bankInventory.bankData = PlayerBankData.createFromNbt(null, buf.readNbt());
+
         }
 
         private void setupInventory() {
@@ -163,9 +164,11 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
                     return ItemStack.EMPTY;
                 }
             }
-            ItemStack stack = new ItemStack(Items.EMERALD, bankInventory.moneyCount);
+
+            int count = bankInventory.getCount();
+            ItemStack stack = new ItemStack(Items.EMERALD, count);
             playerInventory.insertStack(stack);
-            bankInventory.moneyCount = stack.getCount();
+            bankInventory.increaseMoney(stack.getCount() - count);
             bankInventory.markDirty();
             return ItemStack.EMPTY;
         }
@@ -175,8 +178,7 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
         static final int INPUT_SLOT = 0;
         static final int OUTPUT_SLOT = 1;
 
-        private int moneyCount;
-        private Optional<PlayerBankData> bankData = Optional.empty();
+        private PlayerBankData bankData;
 
         @Override
         public void clear() {
@@ -189,28 +191,40 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
 
         @Override
         public ItemStack getStack(int slot) {
-            if (slot == OUTPUT_SLOT && moneyCount > 0) {
-                return new ItemStack(Items.EMERALD, Math.min(64, moneyCount));
+            if (slot == OUTPUT_SLOT && getCount() > 0) {
+                return new ItemStack(Items.EMERALD, Math.min(64, getCount()));
             }
             return ItemStack.EMPTY;
         }
 
         @Override
         public boolean isEmpty() {
-            return moneyCount == 0;
+            return getCount() == 0;
         }
 
         @Override
         public void markDirty() {
-            log.info("money: {}", moneyCount);
-            bankData.ifPresent(data -> data.setDeposit(moneyCount));
+            log.info("money: {}", bankData.getDeposit());
+        }
+
+        public int getCount() {
+            BigDecimal count = bankData.getDeposit();
+            int value = (int) count.doubleValue();
+            if (value <= 0) {
+                value = 0;
+            }
+            return value;
+        }
+
+        public void increaseMoney(int count) {
+            bankData.setDeposit(bankData.getDeposit().add(BigDecimal.valueOf((long) count)));
         }
 
         @Override
         public ItemStack removeStack(int slot) {
-            if (slot == OUTPUT_SLOT && moneyCount > 0) {
-                int removeCount = Math.min(64, moneyCount);
-                moneyCount -= removeCount;
+            if (slot == OUTPUT_SLOT && getCount() > 0) {
+                int removeCount = Math.min(64, getCount());
+                increaseMoney(-removeCount);
                 return new ItemStack(Items.EMERALD, removeCount);
             }
             return ItemStack.EMPTY;
@@ -218,9 +232,9 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
 
         @Override
         public ItemStack removeStack(int slot, int amount) {
-            if (slot == OUTPUT_SLOT && moneyCount > 0) {
-                int removeCount = Math.min(amount, moneyCount);
-                moneyCount -= removeCount;
+            if (slot == OUTPUT_SLOT && getCount() > 0) {
+                int removeCount = Math.min(amount, getCount());
+                increaseMoney(-removeCount);
                 return new ItemStack(Items.EMERALD, removeCount);
             }
             return ItemStack.EMPTY;
@@ -232,18 +246,18 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
                 if (stack.getItem() != Items.EMERALD && !stack.isEmpty()) {
                     throw new IllegalArgumentException();
                 }
-                int amount = Math.min(64, moneyCount) - stack.getCount();
+                int amount = Math.min(64, getCount()) - stack.getCount();
                 if (amount < 0) {
                     throw new IllegalArgumentException();
                 }
-                this.moneyCount -= amount;
+                increaseMoney(-amount);
                 return;
             }
             Item item = stack.getItem();
             if (item == Items.EMERALD) {
-                moneyCount += stack.getCount();
+                increaseMoney(stack.getCount());
             } else if (item == Items.EMERALD_BLOCK) {
-                moneyCount += stack.getCount() * 9;
+                increaseMoney(stack.getCount() * 9);
             } else if (!stack.isEmpty()) {
                 throw new IllegalArgumentException();
             }
@@ -293,7 +307,9 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
         @Override
         public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
             PlayerBankData data = BankData.getBankData(player.getServer()).getPlayerData(player);
-            buf.writeInt(data.getDeposit());
+            NbtCompound nbt = new NbtCompound();
+            data.writeNbt(nbt);
+            buf.writeNbt(nbt);
         }
     }
 }

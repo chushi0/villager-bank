@@ -1,8 +1,11 @@
 package online.cszt0.mcmod.bank.data;
 
+import java.math.BigDecimal;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.nbt.NbtCompound;
+import online.cszt0.mcmod.bank.util.Serialize;
 
 @RequiredArgsConstructor
 public class PlayerBankData {
@@ -12,24 +15,25 @@ public class PlayerBankData {
 
     // 活期储蓄
     @Getter
-    private int deposit;
+    private BigDecimal deposit = BigDecimal.ZERO;
 
     public void markDirty() {
-        bankData.markDirty();
+        if (bankData != null) {
+            bankData.markDirty();
+        }
     }
 
     public void writeNbt(NbtCompound nbt) {
-        nbt.putInt(KEY_DEPOSIT, deposit);
-        return;
+        nbt.putByteArray(KEY_DEPOSIT, Serialize.bigDecimal().serialize(deposit));
     }
 
     public static PlayerBankData createFromNbt(BankData bankData, NbtCompound nbt) {
         PlayerBankData data = new PlayerBankData(bankData);
-        data.deposit = nbt.getInt(KEY_DEPOSIT);
+        data.deposit = (BigDecimal) Serialize.bigDecimal().deserialize(nbt.getByteArray(KEY_DEPOSIT));
         return data;
     }
 
-    public void setDeposit(int deposit) {
+    public void setDeposit(BigDecimal deposit) {
         this.deposit = deposit;
         markDirty();
     }
