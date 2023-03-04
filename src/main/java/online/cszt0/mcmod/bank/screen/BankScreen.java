@@ -36,6 +36,7 @@ import online.cszt0.mcmod.bank.VillageBank;
 import online.cszt0.mcmod.bank.data.BankData;
 import online.cszt0.mcmod.bank.data.PlayerBankData;
 import online.cszt0.mcmod.bank.entity.ClarkVillagerEntity;
+import online.cszt0.mcmod.bank.util.Value;
 
 @Slf4j(topic = VillageBank.MODID)
 public class BankScreen extends HandledScreen<BankScreen.Handler> {
@@ -70,6 +71,10 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
         super.drawForeground(matrices, mouseX, mouseY);
         textRenderer.draw(matrices, DEPOSIT_TEXT, 157 - textRenderer.getWidth(DEPOSIT_TEXT) / 2, 21, 4210752);
         textRenderer.draw(matrices, WITHDRAW_TEXT, 228 - textRenderer.getWidth(WITHDRAW_TEXT) / 2, 21, 4210752);
+        Text remainText = Text.translatable("ui.village_bank.bank_screen.remain",
+                handler.bankInventory.getReadableCount());
+        textRenderer.draw(matrices, remainText, 268 - textRenderer.getWidth(remainText), playerInventoryTitleY - 10,
+                4210752);
     }
 
     @Override
@@ -208,7 +213,7 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
         }
 
         public int getCount() {
-            BigDecimal count = bankData.getDeposit();
+            BigDecimal count = currentValue().get();
             int value = (int) count.doubleValue();
             if (value <= 0) {
                 value = 0;
@@ -216,8 +221,17 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
             return value;
         }
 
+        public String getReadableCount() {
+            return currentValue().get().toEngineeringString();
+        }
+
         public void increaseMoney(int count) {
-            bankData.setDeposit(bankData.getDeposit().add(BigDecimal.valueOf((long) count)));
+            Value<BigDecimal> value = currentValue();
+            value.set(value.get().add(BigDecimal.valueOf(count)));
+        }
+
+        private Value<BigDecimal> currentValue() {
+            return new Value<>(bankData::getDeposit, bankData::setDeposit);
         }
 
         @Override
