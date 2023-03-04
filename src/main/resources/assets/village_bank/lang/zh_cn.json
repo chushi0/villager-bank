@@ -8,5 +8,7 @@
     "advancements.adventure.village_bank.kill_clark.title": "抢银行",
     "advancements.adventure.village_bank.kill_clark.description": "杀死一个银行专员，得到他的绿宝石",
     "ui.village_bank.bank_screen.deposit": "存款",
-    "ui.village_bank.bank_screen.withdraw": "取款"
+    "ui.village_bank.bank_screen.withdraw": "取款",
+    "command.village_bank.error.invalid_argument": "参数错误：%1$s",
+    "command.village_bank.info.deposit": "当前资源持有数：%1$s"
 }

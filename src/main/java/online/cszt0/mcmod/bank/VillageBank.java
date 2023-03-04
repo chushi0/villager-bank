@@ -5,6 +5,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.util.Identifier;
+import online.cszt0.mcmod.bank.command.BankCommand;
 import online.cszt0.mcmod.bank.criterion.ConvertClarkCriterion;
 import online.cszt0.mcmod.bank.entity.ClarkVillagerEntity;
 import online.cszt0.mcmod.bank.screen.BankScreen;
@@ -21,6 +22,7 @@ public class VillageBank implements ModInitializer {
             content.add(ClarkVillagerEntity.getSpawnEgg());
         });
         BankScreen.initializeHandler();
+        BankCommand.initialize();
         log.info("initialized");
     }
 
