@@ -10,6 +10,8 @@ import online.cszt0.mcmod.bank.util.Serialize;
 @RequiredArgsConstructor
 public class PlayerBankData {
     private static final String KEY_DEPOSIT = "Deposit";
+    // 活期存款利息 0.041%
+    private static final BigDecimal INTEREST_DEPOSIT = new BigDecimal("0.00041");
 
     private final BankData bankData;
 
@@ -36,5 +38,13 @@ public class PlayerBankData {
     public void setDeposit(BigDecimal deposit) {
         this.deposit = deposit;
         markDirty();
+    }
+
+    public void updateNewDay() {
+        // 月初发利息
+        if (bankData.getWorldData().getDayOfMonth() == 0) {
+            BigDecimal interest = deposit.multiply(INTEREST_DEPOSIT);
+            deposit = deposit.add(interest);
+        }
     }
 }

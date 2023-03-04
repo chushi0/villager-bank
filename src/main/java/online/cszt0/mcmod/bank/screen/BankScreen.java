@@ -1,6 +1,7 @@
 package online.cszt0.mcmod.bank.screen;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.UUID;
 
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -244,7 +245,7 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
         }
 
         public String getReadableCount() {
-            return currentValue().get().toEngineeringString();
+            return currentValue().get().setScale(3, RoundingMode.DOWN).toEngineeringString();
         }
 
         public void increaseMoney(int count) {
