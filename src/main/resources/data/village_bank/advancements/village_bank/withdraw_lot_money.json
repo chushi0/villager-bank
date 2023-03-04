@@ -1,0 +1,29 @@
+{
+    "display": {
+        "icon": {
+            "item": "minecraft:paper"
+        },
+        "title": {
+            "translate": "advancements.adventure.village_bank.withdraw_lot_money.title"
+        },
+        "frame": "task",
+        "description": {
+            "translate": "advancements.adventure.village_bank.withdraw_lot_money.description"
+        },
+        "announce_to_chat": true,
+        "show_toast": true,
+        "hidden": true
+    },
+    "parent": "village_bank:village_bank/save_money",
+    "criteria": {
+        "save_money": {
+            "trigger": "village_bank:criterion_save_money",
+            "conditions": {
+                "max": -1728
+            }
+        }
+    },
+    "rewards": {
+        "experience": 15
+    }
+}

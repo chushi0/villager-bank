@@ -38,6 +38,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.village.Merchant;
 import net.minecraft.village.SimpleMerchant;
 import online.cszt0.mcmod.bank.VillageBank;
+import online.cszt0.mcmod.bank.criterion.SaveMoneyCriterion;
 import online.cszt0.mcmod.bank.data.BankData;
 import online.cszt0.mcmod.bank.data.PlayerBankData;
 import online.cszt0.mcmod.bank.entity.ClarkVillagerEntity;
@@ -251,11 +252,22 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
         public void increaseMoney(int count) {
             Value<BigDecimal> value = currentValue();
             value.set(value.get().add(BigDecimal.valueOf(count)));
+            Value<BigDecimal> log = currentLogValue();
+            if (log != null) {
+                log.set(log.get().add(BigDecimal.valueOf(count)));
+            }
             handler.playYesSound();
+            if (handler.playerInventory.player instanceof ServerPlayerEntity serverPlayer) {
+                SaveMoneyCriterion.getCriterion().trigger(serverPlayer);
+            }
         }
 
         private Value<BigDecimal> currentValue() {
             return new Value<>(bankData::getDeposit, bankData::setDeposit);
+        }
+
+        private Value<BigDecimal> currentLogValue() {
+            return new Value<>(bankData::getDepositOneDay, bankData::setDepositOneDay);
         }
 
         @Override

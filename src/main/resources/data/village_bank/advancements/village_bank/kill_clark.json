@@ -6,7 +6,7 @@
         "title": {
             "translate": "advancements.adventure.village_bank.kill_clark.title"
         },
-        "frame": "goal",
+        "frame": "task",
         "description": {
             "translate": "advancements.adventure.village_bank.kill_clark.description"
         },

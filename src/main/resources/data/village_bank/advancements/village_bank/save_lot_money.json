@@ -1,0 +1,28 @@
+{
+    "display": {
+        "icon": {
+            "item": "minecraft:ender_chest"
+        },
+        "title": {
+            "translate": "advancements.adventure.village_bank.save_lot_money.title"
+        },
+        "frame": "challenge",
+        "description": {
+            "translate": "advancements.adventure.village_bank.save_lot_money.description"
+        },
+        "announce_to_chat": true,
+        "show_toast": true
+    },
+    "parent": "village_bank:village_bank/save_money",
+    "criteria": {
+        "save_money": {
+            "trigger": "village_bank:criterion_save_money",
+            "conditions": {
+                "min": 15552
+            }
+        }
+    },
+    "rewards": {
+        "experience": 50
+    }
+}
