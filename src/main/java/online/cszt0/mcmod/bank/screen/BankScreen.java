@@ -15,6 +15,7 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
@@ -30,8 +31,11 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.village.Merchant;
+import net.minecraft.village.SimpleMerchant;
 import online.cszt0.mcmod.bank.VillageBank;
 import online.cszt0.mcmod.bank.data.BankData;
 import online.cszt0.mcmod.bank.data.PlayerBankData;
@@ -100,27 +104,42 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
         @Getter
         private UUID entityUuid;
 
+        private final Merchant merchant;
         private final PlayerInventory playerInventory;
         private final BankInventory bankInventory;
 
-        public Handler(int syncId, PlayerInventory inventory) {
+        public Handler(int syncId, PlayerInventory inventory, Merchant merchant) {
             super(ScreenType, syncId);
+            this.merchant = merchant;
             this.playerInventory = inventory;
-            this.bankInventory = new BankInventory();
+            this.bankInventory = new BankInventory(this);
             setupInventory();
             setupDepositAndWithdraw();
         }
 
-        public Handler(int syncId, PlayerInventory inv, PlayerEntity player) {
-            this(syncId, inv);
+        public Handler(int syncId, PlayerInventory inv, PlayerEntity player, Merchant merchant) {
+            this(syncId, inv, merchant);
             PlayerBankData data = BankData.getBankData(player.getServer()).getPlayerData(player);
             bankInventory.bankData = data;
         }
 
         public Handler(int syncId, PlayerInventory inv, PacketByteBuf buf) {
-            this(syncId, inv);
+            this(syncId, inv, new SimpleMerchant(inv.player));
             bankInventory.bankData = PlayerBankData.createFromNbt(null, buf.readNbt());
+        }
 
+        private void playYesSound() {
+            if (!this.merchant.isClient()) {
+                Entity entity = (Entity) this.merchant;
+                entity.getWorld().playSound(entity.getX(), entity.getY(), entity.getZ(), this.merchant.getYesSound(),
+                        SoundCategory.NEUTRAL, 1.0F, 1.0F, false);
+            }
+        }
+
+        @Override
+        public void close(PlayerEntity player) {
+            super.close(player);
+            merchant.setCustomer(null);
         }
 
         private void setupInventory() {
@@ -179,9 +198,12 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
         }
     }
 
+    @RequiredArgsConstructor
     public static class BankInventory implements Inventory {
         static final int INPUT_SLOT = 0;
         static final int OUTPUT_SLOT = 1;
+
+        private final Handler handler;
 
         private PlayerBankData bankData;
 
@@ -228,6 +250,7 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
         public void increaseMoney(int count) {
             Value<BigDecimal> value = currentValue();
             value.set(value.get().add(BigDecimal.valueOf(count)));
+            handler.playYesSound();
         }
 
         private Value<BigDecimal> currentValue() {
@@ -310,7 +333,7 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
 
         @Override
         public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
-            return new Handler(syncId, inv, player);
+            return new Handler(syncId, inv, player, entity);
         }
 
         @Override
