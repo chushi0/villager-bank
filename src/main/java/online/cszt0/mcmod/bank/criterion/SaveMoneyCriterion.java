@@ -1,7 +1,5 @@
 package online.cszt0.mcmod.bank.criterion;
 
-import java.util.function.Predicate;
-
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -17,7 +15,7 @@ import online.cszt0.mcmod.bank.VillageBank;
 import online.cszt0.mcmod.bank.data.BankData;
 import online.cszt0.mcmod.bank.data.PlayerBankData;
 
-public class SaveMoneyCriterion extends AbstractCriterion<SaveMoneyCriterion.Condition> implements Criterion {
+public class SaveMoneyCriterion extends AbstractCriterion<SaveMoneyCriterion.Condition> {
     private static final Identifier identifier = VillageBank.identity("criterion_save_money");
 
     @Getter
@@ -27,7 +25,6 @@ public class SaveMoneyCriterion extends AbstractCriterion<SaveMoneyCriterion.Con
         criterion = Criteria.register(new SaveMoneyCriterion());
     }
 
-    @Override
     public void trigger(ServerPlayerEntity player) {
         trigger(player, condition -> condition.test(player));
     }
@@ -43,7 +40,7 @@ public class SaveMoneyCriterion extends AbstractCriterion<SaveMoneyCriterion.Con
         return new Condition(obj.get("min"), obj.get("max"));
     }
 
-    public static class Condition extends AbstractCriterionConditions implements Predicate<ServerPlayerEntity> {
+    public static class Condition extends AbstractCriterionConditions {
 
         private final boolean hasMin;
         private final boolean hasMax;
@@ -68,7 +65,6 @@ public class SaveMoneyCriterion extends AbstractCriterion<SaveMoneyCriterion.Con
             }
         }
 
-        @Override
         public boolean test(ServerPlayerEntity player) {
             PlayerBankData data = BankData.getBankData(player.getServer()).getPlayerData(player);
             double v = data.getDepositOneDay().doubleValue();

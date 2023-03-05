@@ -42,10 +42,9 @@ public abstract class VillagerEntityMixin {
         }
         itemStack.decrement(1);
         entity.playSound(SoundEvents.ENTITY_ZOMBIE_VILLAGER_CURE, 1.0F, entity.getSoundPitch());
+        ConvertClarkCriterion.getCriterion().trigger((ServerPlayerEntity) player, entity);
 
         releaseAllTickets();
         entity.convertTo(ClarkVillagerEntity.getEntityType(), true);
-
-        ConvertClarkCriterion.getCriterion().trigger((ServerPlayerEntity) player);
     }
 }

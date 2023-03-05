@@ -34,6 +34,12 @@ public class ClarkVillagerEntityRenderer extends MobEntityRenderer<ClarkVillager
     @Override
     protected void scale(ClarkVillagerEntity villagerEntity, MatrixStack matrixStack, float f) {
         float g = 0.9375F;
+        if (villagerEntity.isBaby()) {
+            g *= 0.5F;
+            this.shadowRadius = 0.25F;
+        } else {
+            this.shadowRadius = 0.5F;
+        }
 
         matrixStack.scale(g, g, g);
     }

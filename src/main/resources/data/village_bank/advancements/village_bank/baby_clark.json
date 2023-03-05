@@ -1,0 +1,29 @@
+{
+    "display": {
+        "icon": {
+            "item": "minecraft:egg"
+        },
+        "title": {
+            "translate": "advancements.adventure.village_bank.baby_clark.title"
+        },
+        "frame": "task",
+        "description": {
+            "translate": "advancements.adventure.village_bank.baby_clark.description"
+        },
+        "announce_to_chat": true,
+        "show_toast": true,
+        "hidden": true
+    },
+    "parent": "village_bank:village_bank/convert_clark",
+    "criteria": {
+        "convert_clark": {
+            "trigger": "village_bank:criterion_convert_clark",
+            "conditions": {
+                "baby": true
+            }
+        }
+    },
+    "rewards": {
+        "experience": 10
+    }
+}
