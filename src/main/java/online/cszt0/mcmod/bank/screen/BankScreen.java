@@ -2,6 +2,8 @@ package online.cszt0.mcmod.bank.screen;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -14,6 +16,8 @@ import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
+import net.minecraft.client.gui.screen.ingame.MerchantScreen;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
@@ -30,11 +34,13 @@ import net.minecraft.registry.Registry;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.screen.ScreenTexts;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.village.Merchant;
 import net.minecraft.village.SimpleMerchant;
 import online.cszt0.mcmod.bank.VillageBank;
@@ -53,11 +59,34 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
     private static final Text DEPOSIT_TEXT = Text.translatable("ui.village_bank.bank_screen.deposit");
     private static final Text WITHDRAW_TEXT = Text.translatable("ui.village_bank.bank_screen.withdraw");
 
+    private int selectedIndex;
+    private int indexStartOffset;
+    private boolean scrolling;
+
+    private WidgetButtonPage[] businesses;
+
     public BankScreen(BankScreen.Handler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
         log.info("initialize bankscreen");
         this.backgroundWidth = 276;
         this.playerInventoryTitleX = 107;
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        businesses = new WidgetButtonPage[7];
+        int x = (this.width - this.backgroundWidth) / 2 + 5;
+        int y = (this.height - this.backgroundHeight) / 2 + 16 + 2;
+        for (int i = 0; i < businesses.length; i++) {
+            businesses[i] = addDrawableChild(new WidgetButtonPage(x, y, i, (button) -> {
+                if (button instanceof WidgetButtonPage btnPage) {
+                    this.selectedIndex = btnPage.getIndex() + this.indexStartOffset;
+                    // this.syncRecipeIndex();
+                }
+            }));
+            y += 20;
+        }
     }
 
     public static void initialize() {
@@ -92,13 +121,158 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
         int j = (this.height - this.backgroundHeight) / 2;
         drawTexture(matrices, i, j, this.getZOffset(), 0.0F, 0.0F, this.backgroundWidth, this.backgroundHeight, 512,
                 256);
+        List<Business> businessList = handler.getBusinessList();
+        if (!businessList.isEmpty()) {
+            int k = this.selectedIndex;
+            if (k < 0 || k >= businessList.size()) {
+                return;
+            }
+            // RenderSystem.setShaderTexture(0, TEXTURE);
+            // RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            // drawTexture(matrices, this.x + 83 + 99, this.y + 35, this.getZOffset(),
+            // 311.0F, 0.0F, 28, 21, 512, 256);
+        }
     }
 
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         renderBackground(matrices);
         super.render(matrices, mouseX, mouseY, delta);
+        renderBusinessList(matrices, mouseX, mouseY, delta);
         drawMouseoverTooltip(matrices, mouseX, mouseY);
+    }
+
+    private void renderBusinessList(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        List<Business> businessList = handler.getBusinessList();
+        if (businessList.isEmpty()) {
+            return;
+        }
+        int i = (this.width - this.backgroundWidth) / 2;
+        int j = (this.height - this.backgroundHeight) / 2;
+        int k = j + 16 + 1;
+        int l = i + 5 + 5;
+        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+        RenderSystem.setShaderTexture(0, TEXTURE);
+        renderScrollbar(matrices, i, j, businessList);
+        int m = 0;
+        for (Business tradeOffer : businessList) {
+            if (canScroll(businessList.size())
+                    && (m < this.indexStartOffset || m >= 7 + this.indexStartOffset)) {
+                m++;
+                continue;
+            }
+            // ItemStack itemStack = tradeOffer.getOriginalFirstBuyItem();
+            // ItemStack itemStack2 = tradeOffer.getAdjustedFirstBuyItem();
+            // ItemStack itemStack3 = tradeOffer.getSecondBuyItem();
+            // ItemStack itemStack4 = tradeOffer.getSellItem();
+            // this.itemRenderer.zOffset = 100.0F;
+            // int n = k + 2;
+            // renderFirstBuyItem(matrices, itemStack2, itemStack, l, n);
+            // if (!itemStack3.isEmpty()) {
+            // this.itemRenderer.renderInGui(itemStack3, i + 5 + 35, n);
+            // this.itemRenderer.renderGuiItemOverlay(this.textRenderer, itemStack3, i + 5 +
+            // 35, n);
+            // }
+
+            // renderArrow(matrices, tradeOffer, i, n);
+            // this.itemRenderer.renderInGui(itemStack4, i + 5 + 68, n);
+            // this.itemRenderer.renderGuiItemOverlay(this.textRenderer, itemStack4, i + 5 +
+            // 68, n);
+            // this.itemRenderer.zOffset = 0.0F;
+            k += 20;
+            m++;
+        }
+
+        // int o = this.selectedIndex;
+        // Business tradeOffer = businessList.get(o);
+        // if (this.handler.isLeveled()) {
+        // this.drawLevelInfo(matrices, i, j, tradeOffer);
+        // }
+
+        // if (tradeOffer.isDisabled() && this.isPointWithinBounds(186, 35, 22, 21,
+        // (double) mouseX, (double) mouseY)
+        // && this.handler.canRefreshTrades()) {
+        // this.renderTooltip(matrices, DEPRECATED_TEXT, mouseX, mouseY);
+        // }
+
+        // net.minecraft.client.gui.screen.ingame.MerchantScreen.WidgetButtonPage[]
+        // var19 = this.offers;
+        // int var20 = var19.length;
+
+        for (WidgetButtonPage widgetButtonPage : this.businesses) {
+            // net.minecraft.client.gui.screen.ingame.MerchantScreen.WidgetButtonPage
+            // widgetButtonPage = var19[var21];
+            // if (widgetButtonPage.isHovered()) {
+            // widgetButtonPage.renderTooltip(matrices, mouseX, mouseY);
+            // }
+
+            int index = widgetButtonPage.getIndex() + indexStartOffset;
+            boolean available = index < this.handler.getBusinessList().size();
+            widgetButtonPage.visible = available;
+            if (available) {
+                widgetButtonPage.setMessage(handler.getBusinessList().get(index).getText());
+            }
+        }
+
+        RenderSystem.enableDepthTest();
+    }
+
+    private void renderScrollbar(MatrixStack matrices, int x, int y, List<Business> businessList) {
+        int i = businessList.size() + 1 - 7;
+        if (i > 1) {
+            int j = 139 - (27 + (i - 1) * 139 / i);
+            int k = 1 + j / i + 139 / i;
+            int m = Math.min(113, this.indexStartOffset * k);
+            if (this.indexStartOffset == i - 1) {
+                m = 113;
+            }
+
+            drawTexture(matrices, x + 94, y + 18 + m, this.getZOffset(), 0.0F, 199.0F, 6, 27, 512, 256);
+        } else {
+            drawTexture(matrices, x + 94, y + 18, this.getZOffset(), 6.0F, 199.0F, 6, 27, 512, 256);
+        }
+    }
+
+    private boolean canScroll(int listSize) {
+        return listSize > 7;
+    }
+
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        int i = handler.getBusinessList().size();
+        if (this.canScroll(i)) {
+            int j = i - 7;
+            this.indexStartOffset = MathHelper.clamp((int) ((double) this.indexStartOffset - amount), 0, j);
+        }
+
+        return true;
+    }
+
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        int i = handler.getBusinessList().size();
+        if (this.scrolling) {
+            int j = this.y + 18;
+            int k = j + 139;
+            int l = i - 7;
+            float f = ((float) mouseY - (float) j - 13.5F) / ((float) (k - j) - 27.0F);
+            f = f * (float) l + 0.5F;
+            this.indexStartOffset = MathHelper.clamp((int) f, 0, l);
+            return true;
+        } else {
+            return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        }
+    }
+
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        this.scrolling = false;
+        int i = (this.width - this.backgroundWidth) / 2;
+        int j = (this.height - this.backgroundHeight) / 2;
+        if (this.canScroll(handler.getBusinessList().size()) && mouseX > i + 94
+                && mouseX < i + 94 + 6 && mouseY > j + 18
+                && mouseY <= j + 18 + 139 + 1) {
+            this.scrolling = true;
+        }
+
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     public static class Handler extends ScreenHandler {
@@ -117,6 +291,16 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
             this.bankInventory = new BankInventory(this);
             setupInventory();
             setupDepositAndWithdraw();
+        }
+
+        public List<Business> getBusinessList() {
+            return Arrays.asList(
+                    Business.DEPOSIT,
+                    Business.TIME_DEPOSIT_3,
+                    Business.TIME_DEPOSIT_6,
+                    Business.TIME_DEPOSIT_12,
+                    Business.TIME_DEPOSIT_36,
+                    Business.TIME_DEPOSIT_60);
         }
 
         public Handler(int syncId, PlayerInventory inv, PlayerEntity player, Merchant merchant) {
@@ -361,5 +545,35 @@ public class BankScreen extends HandledScreen<BankScreen.Handler> {
             data.writeNbt(nbt);
             buf.writeNbt(nbt);
         }
+    }
+
+    public static class WidgetButtonPage extends ButtonWidget {
+        @Getter
+        private final int index;
+
+        public WidgetButtonPage(int x, int y, int index, PressAction onPress) {
+            super(x, y, 89, 20, ScreenTexts.EMPTY, onPress, DEFAULT_NARRATION_SUPPLIER);
+            this.index = index;
+            this.visible = false;
+        }
+    }
+
+    @RequiredArgsConstructor
+    public static class Business {
+        public static final Business DEPOSIT = new Business(
+                Text.translatable("ui.village_bank.bank_screen.business.deposit"));
+        public static final Business TIME_DEPOSIT_3 = new Business(
+                Text.translatable("ui.village_bank.bank_screen.business.time_deposit.3"));
+        public static final Business TIME_DEPOSIT_6 = new Business(
+                Text.translatable("ui.village_bank.bank_screen.business.time_deposit.6"));
+        public static final Business TIME_DEPOSIT_12 = new Business(
+                Text.translatable("ui.village_bank.bank_screen.business.time_deposit.12"));
+        public static final Business TIME_DEPOSIT_36 = new Business(
+                Text.translatable("ui.village_bank.bank_screen.business.time_deposit.36"));
+        public static final Business TIME_DEPOSIT_60 = new Business(
+                Text.translatable("ui.village_bank.bank_screen.business.time_deposit.60"));
+
+        @Getter
+        private final Text text;
     }
 }
